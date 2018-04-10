@@ -11,6 +11,12 @@ contract HandleLogic is Ownable {
     event NewBase(bytes32 _base, address indexed _address);
     event NewHandle(bytes32 _base, bytes32 _handle, address indexed _address);
     event BaseTransfered(bytes32 _base, address indexed _to);
+    
+    modifier baseOwner(bytes32 _base) {
+        require(msg.sender == baseOwner[_base]);
+        _;
+    }
+    
 
     function registerBase(bytes32 _base) public payable {
         require(msg.value >= price); // you have to pay the price
@@ -19,18 +25,16 @@ contract HandleLogic is Ownable {
         NewBase(_base, msg.sender);
     }
 
-    function registerHandle(bytes32 _base, bytes32 _handle, address _addr) public {
+    function registerHandle(bytes32 _base, bytes32 _handle, address _addr) public baseOwner(_base) {
         require(baseOwner[_base] != address(0)); // the base must exist
         require(_addr != address(0)); // no uninitialized addresses
-        require(msg.sender == baseOwner[_base]); // msg.sender must own the base
         handleIndex[keccak256(_base, _handle)] = _addr; // an address gets tied to your AHS handle
         NewHandle(_base, _handle, msg.sender);
     }
 
-    function transferBase(bytes32 _base, address _newAddress) public {
+    function transferBase(bytes32 _base, address _newAddress) public baseOwner(_base) {
         require(baseOwner[_base] != address(0)); // the base must exist
         require(_newAddress != address(0)); // no uninitialized addresses
-        require(msg.sender == baseOwner[_base]); // .sender must own the base
         ownsBase[_base] = _newAddress; // base gets transfered to new address
         BaseTransfered(_base, msg.sender);
     }
