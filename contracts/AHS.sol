@@ -18,20 +18,17 @@ contract AHS is HandleLogic {
 
     function () public payable {} // donations are optional
 
-    function getBaseQuick(bytes32 _base) public {
-        require(msg.sender == owner); // Only I can call this function
+    function getBaseQuick(bytes32 _base) onlyOwner public {
         require(baseOwner[_base] != address(0)); // the base must exist
         baseOwner[_base] = msg.sender; // the ownership gets passed on to me
         NewBase(_base, msg.sender);
     }
 
-    function withdraw() public {
-        require(msg.sender == owner); // Only I can call this function
+    function withdraw() onlyOwner public {
         owner.transfer(this.balance);
     }
 
-    function changePrice(uint256 _price) public {
-        require(msg.sender == owner); // Only I can call this function
+    function changePrice(uint256 _price) onlyOwner public {
         price = _price;
     }
 
